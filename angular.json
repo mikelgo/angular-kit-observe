@@ -115,6 +115,47 @@
           }
         }
       }
+    },
+    "rx-observe": {
+      "projectType": "library",
+      "root": "libs/rx-observe",
+      "sourceRoot": "libs/rx-observe/src",
+      "prefix": "observe5",
+      "architect": {
+        "build": {
+          "builder": "@nrwl/angular:package",
+          "outputs": ["dist/libs/rx-observe"],
+          "options": {
+            "project": "libs/rx-observe/ng-package.json"
+          },
+          "configurations": {
+            "production": {
+              "tsConfig": "libs/rx-observe/tsconfig.lib.prod.json"
+            },
+            "development": {
+              "tsConfig": "libs/rx-observe/tsconfig.lib.json"
+            }
+          },
+          "defaultConfiguration": "production"
+        },
+        "test": {
+          "builder": "@nrwl/jest:jest",
+          "outputs": ["coverage/libs/rx-observe"],
+          "options": {
+            "jestConfig": "libs/rx-observe/jest.config.js",
+            "passWithNoTests": true
+          }
+        },
+        "lint": {
+          "builder": "@nrwl/linter:eslint",
+          "options": {
+            "lintFilePatterns": [
+              "libs/rx-observe/src/**/*.ts",
+              "libs/rx-observe/src/**/*.html"
+            ]
+          }
+        }
+      }
     }
   },
   "cli": {

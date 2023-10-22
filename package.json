@@ -19,6 +19,7 @@
     "@angular/platform-browser": "^12.2.0",
     "@angular/platform-browser-dynamic": "^12.2.0",
     "@angular/router": "^12.2.0",
+    "@code-workers.io/ngx-dirty-checker": "^1.0.1",
     "@nrwl/angular": "12.8.0",
     "rxjs": "~7.0.0",
     "tslib": "^2.0.0",
@@ -32,6 +33,8 @@
     "@angular/cli": "~12.2.0",
     "@angular/compiler-cli": "^12.2.0",
     "@angular/language-service": "^12.2.0",
+    "@hirez_io/observer-spy": "^2.2.0",
+    "@ngneat/spectator": "^13.0.0",
     "@nrwl/cli": "12.8.0",
     "@nrwl/cypress": "12.8.0",
     "@nrwl/eslint-plugin-nx": "12.8.0",
@@ -49,9 +52,9 @@
     "eslint-plugin-cypress": "^2.10.3",
     "jest": "27.0.3",
     "jest-preset-angular": "9.0.4",
+    "ng-packagr": "^12.1.0",
     "prettier": "^2.3.1",
     "ts-jest": "27.0.3",
     "typescript": "~4.3.5"
   }
 }
-

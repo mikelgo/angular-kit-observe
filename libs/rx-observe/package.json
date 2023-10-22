@@ -1,0 +1,29 @@
+{
+  "name": "@angular-kit/observe",
+  "version": "12.0.0-rc-0",
+  "publishConfig": {
+    "access": "public"
+  },
+  "peerDependencies": {
+    "@angular/core": ">=12.2.0",
+    "@angular/common": ">=12.2.0",
+    "rxjs": ">=7.0.0"
+  },
+  "dependencies": {
+    "tslib": "^2.3.0"
+  },
+  "license": "MIT",
+  "description": "The better async pipe for Angular",
+  "keywords": [
+    "angular",
+    "optimized async pipe",
+    "better async pipe",
+    "async pipe"
+  ],
+  "author": "Michael Berger",
+  "homepage": "https://github.com/mikelgo/angular-kit/libs/observe#readme",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mikelgo/angular-kit"
+  }
+}
