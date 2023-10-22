@@ -1,7 +1,6 @@
-import {debounceTime, share} from 'rxjs/operators';
-import {Observable, ReplaySubject, SchedulerLike,} from 'rxjs';
-import {ElementRef} from '@angular/core';
-
+import { debounceTime, share } from 'rxjs/operators';
+import { Observable, ReplaySubject, SchedulerLike } from 'rxjs';
+import { ElementRef } from '@angular/core';
 
 export function isElementRef(value: unknown): value is ElementRef {
   return value instanceof ElementRef;
@@ -17,31 +16,39 @@ export type IntersectionObserverConfig = {
   throttleMs?: number;
   /** scheduler to use for throttling */
   scheduler?: SchedulerLike;
-}
+};
 
 export function createIntersectionObserver(
-    observeElement: ElementRef | Element,
-    options?: IntersectionObserverInit,
-    cfg?: IntersectionObserverConfig
+  observeElement: ElementRef | Element,
+  options?: IntersectionObserverInit,
+  cfg?: IntersectionObserverConfig
 ): Observable<IntersectionObserverEntry[]> {
   if (!supportsIntersectionObserver()) {
-    throw new Error('[AngularKit] IntersectionObserver is not supported in this browser');
+    throw new Error(
+      '[AngularKit] IntersectionObserver is not supported in this browser'
+    );
   }
   const obs$ = new Observable<IntersectionObserverEntry[]>((subscriber) => {
     const intersectionObserver = new IntersectionObserver((entries) => {
       subscriber.next(entries);
     }, options ?? {});
 
-    intersectionObserver.observe(isElementRef(observeElement) ? observeElement.nativeElement : observeElement);
+    intersectionObserver.observe(
+      isElementRef(observeElement)
+        ? observeElement.nativeElement
+        : observeElement
+    );
 
     return () => intersectionObserver.disconnect();
   });
 
   return obs$.pipe(
-      cfg?.throttleMs ? debounceTime(cfg?.throttleMs, cfg?.scheduler) : debounceTime(DEFAULT_THROTTLE_TIME),
-      share({
-        connector: () => new ReplaySubject(1),
-        resetOnRefCountZero: true
-      })
+    cfg?.throttleMs
+      ? debounceTime(cfg?.throttleMs, cfg?.scheduler)
+      : debounceTime(DEFAULT_THROTTLE_TIME),
+    share({
+      connector: () => new ReplaySubject(1),
+      resetOnRefCountZero: true,
+    })
   );
 }

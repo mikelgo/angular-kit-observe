@@ -1,40 +1,50 @@
 import {
   ComponentFactoryResolver,
   Directive,
-  EmbeddedViewRef, Inject,
+  EmbeddedViewRef,
+  Inject,
   Injector,
-  Input, NgModule,
+  Input,
+  NgModule,
   OnDestroy,
-  OnInit, Optional,
+  OnInit,
+  Optional,
   TemplateRef,
   ViewContainerRef,
 } from '@angular/core';
 import {
   BehaviorSubject,
-
   Observable,
   of,
   ReplaySubject,
-
   Subject,
   Subscription,
-
 } from 'rxjs';
 import {
-  switchMap,
-  withLatestFrom,  startWith,  combineLatestWith,
+  combineLatestWith,
   distinctUntilChanged,
   filter,
   map,
-  mergeAll,} from 'rxjs/operators';
-import {OBSERVE_DIRECTIVE_CONFIG, OBSERVE_DIRECTIVE_CONTEXT, ObserveDirectiveConfig} from './observe-directive-config';
-import {isViewportRenderStrategy, RenderStrategies} from './types/render-strategies';
-import {coerceObservable} from './util/coerce-observable';
-import {RenderContext} from './types/render-context';
-import {ObserveDirectiveContext} from './types/observe-directive-context';
-import {setupOperator$} from './util/setup-operator';
-import {createIntersectionObserver} from './util/create-intersection-observer';
-import {supportsIntersectionObserver} from './util/supports-intersection-observer';
+  mergeAll,
+  startWith,
+  switchMap,
+  withLatestFrom,
+} from 'rxjs/operators';
+import {
+  OBSERVE_DIRECTIVE_CONFIG,
+  OBSERVE_DIRECTIVE_CONTEXT,
+  ObserveDirectiveConfig,
+} from './observe-directive-config';
+import {
+  isViewportRenderStrategy,
+  RenderStrategies,
+} from './types/render-strategies';
+import { coerceObservable } from './util/coerce-observable';
+import { RenderContext } from './types/render-context';
+import { ObserveDirectiveContext } from './types/observe-directive-context';
+import { setupOperator$ } from './util/setup-operator';
+import { createIntersectionObserver } from './util/create-intersection-observer';
+import { supportsIntersectionObserver } from './util/supports-intersection-observer';
 
 @Directive({
   selector: '[rxObserve]',
@@ -42,10 +52,12 @@ import {supportsIntersectionObserver} from './util/supports-intersection-observe
 export class RxObserveDirective<T> implements OnInit, OnDestroy {
   private source$$ = new ReplaySubject<Observable<T | null>>(1);
   private refreshEffect$$ = new ReplaySubject<Subject<any>>(1);
-  private loadingTemplate$$ = new ReplaySubject<TemplateRef<ObserveDirectiveContext<T>>>(1);
+  private loadingTemplate$$ = new ReplaySubject<
+    TemplateRef<ObserveDirectiveContext<T>>
+  >(1);
   private renderCallback$$: ReplaySubject<RenderContext<T>> | undefined;
   private renderStrategy$$ = new BehaviorSubject<Observable<RenderStrategies>>(
-      of(this.config?.renderStrategy ?? { type: 'default' })
+    of(this.config?.renderStrategy ?? { type: 'default' })
   );
 
   private detach = true;
@@ -77,7 +89,9 @@ export class RxObserveDirective<T> implements OnInit, OnDestroy {
    * A template to be rendered while the stream is in a loading state.
    * @param tpl
    */
-  @Input() set rxObserveLoadingTemplate(tpl: TemplateRef<ObserveDirectiveContext<T>>) {
+  @Input() set rxObserveLoadingTemplate(
+    tpl: TemplateRef<ObserveDirectiveContext<T>>
+  ) {
     if (tpl) {
       this.loadingTemplate$$.next(tpl);
     }
@@ -87,12 +101,16 @@ export class RxObserveDirective<T> implements OnInit, OnDestroy {
    * @description
    * A template to be rendered when the value source emits an error.
    */
-  @Input() rxObserveErrorTemplate: TemplateRef<ObserveDirectiveContext<T>> | undefined;
+  @Input() rxObserveErrorTemplate:
+    | TemplateRef<ObserveDirectiveContext<T>>
+    | undefined;
   /**
    * @description
    * A template to be rendered when the value source completes.
    */
-  @Input() rxObserveCompleteTemplate: TemplateRef<ObserveDirectiveContext<T>> | undefined;
+  @Input() rxObserveCompleteTemplate:
+    | TemplateRef<ObserveDirectiveContext<T>>
+    | undefined;
 
   /**
    * @description
@@ -112,7 +130,9 @@ export class RxObserveDirective<T> implements OnInit, OnDestroy {
    * Default: {@link DefaultRenderStrategy}
    * @param strategy
    */
-  @Input() set rxObserveRenderStrategy(strategy: RenderStrategies | Observable<RenderStrategies>) {
+  @Input() set rxObserveRenderStrategy(
+    strategy: RenderStrategies | Observable<RenderStrategies>
+  ) {
     if (strategy) {
       this.renderStrategy$$.next(coerceObservable(strategy));
     }
@@ -125,7 +145,8 @@ export class RxObserveDirective<T> implements OnInit, OnDestroy {
    *
    * Default: false
    */
-  @Input() rxObserveKeepValueOnLoading = this.config?.keepValueOnLoading ?? false;
+  @Input() rxObserveKeepValueOnLoading =
+    this.config?.keepValueOnLoading ?? false;
   /**
    * @description
    * A flag to control if the view should be created lazily or not.
@@ -147,13 +168,11 @@ export class RxObserveDirective<T> implements OnInit, OnDestroy {
     renderCount: 0,
   };
 
-  readonly renderStrategy$ = this.renderStrategy$$.asObservable().pipe(
-      distinctUntilChanged(),
-      mergeAll(),
-      distinctUntilChanged()
-  );
+  readonly renderStrategy$ = this.renderStrategy$$
+    .asObservable()
+    .pipe(distinctUntilChanged(), mergeAll(), distinctUntilChanged());
   readonly isViewPortStrategy$ = this.renderStrategy$.pipe(
-      map((strategy) => strategy.type === 'viewport')
+    map((strategy) => strategy.type === 'viewport')
   );
   readonly renderStrategyOperator$ = setupOperator$(this.renderStrategy$);
   readonly source$ = this.source$$.pipe(distinctUntilChanged());
@@ -165,17 +184,21 @@ export class RxObserveDirective<T> implements OnInit, OnDestroy {
    *
    * when switching to/from viewPort strategy emit a signal and end respective observables
    */
-  viewPortObserver$: Observable<IntersectionObserverEntry[] | null> = this.renderStrategy$.pipe(
+  viewPortObserver$: Observable<IntersectionObserverEntry[] | null> =
+    this.renderStrategy$.pipe(
       switchMap((strategy) => {
         if (isViewportRenderStrategy(strategy)) {
           if (!supportsIntersectionObserver()) {
             return of(null);
           }
-          return createIntersectionObserver(this.viewContainerRef.element.nativeElement.parentElement, {
-            threshold: strategy.threshold,
-            rootMargin: strategy.rootMargin,
-            root: strategy.root,
-          });
+          return createIntersectionObserver(
+            this.viewContainerRef.element.nativeElement.parentElement,
+            {
+              threshold: strategy.threshold,
+              rootMargin: strategy.rootMargin,
+              root: strategy.root,
+            }
+          );
           /*     .pipe(
             takeUntil(this.renderStrategy$$.pipe(skip(1)))
           )*/
@@ -183,44 +206,46 @@ export class RxObserveDirective<T> implements OnInit, OnDestroy {
 
         return of(null);
       })
+    );
+  visible$ = this.viewPortObserver$.pipe(
+    map((entries) => entries?.some((entry) => entry.isIntersecting))
   );
-  visible$ = this.viewPortObserver$.pipe(map((entries) => entries?.some((entry) => entry.isIntersecting)));
 
   readonly sourceWithOperator$ = this.renderStrategyOperator$.pipe(
-      withLatestFrom(this.source$),
-      /**
-       * unsubscribe from previous source and subscribe to new source
-       * apply operator from renderStrategy.
-       *
-       * when unsubscribe from previous source, the last value will be lost.
-       * We can fix this by providing context also via observable and
-       * withLatestFrom it here.
-       */
-      switchMap(([o, source$]) => {
-        return source$.pipe(
-            //@ts-ignore
-            o
-            //takeUntil(this.renderStrategy$$.pipe(skip(1)))
-        );
-      })
+    withLatestFrom(this.source$),
+    /**
+     * unsubscribe from previous source and subscribe to new source
+     * apply operator from renderStrategy.
+     *
+     * when unsubscribe from previous source, the last value will be lost.
+     * We can fix this by providing context also via observable and
+     * withLatestFrom it here.
+     */
+    switchMap(([o, source$]) => {
+      return source$.pipe(
+        //@ts-ignore
+        o
+        //takeUntil(this.renderStrategy$$.pipe(skip(1)))
+      );
+    })
   );
 
   static ngTemplateContextGuard<T>(
-      directive: RxObserveDirective<T>,
-      context: unknown
+    directive: RxObserveDirective<T>,
+    context: unknown
   ): context is ObserveDirectiveContext<T> {
     return true;
   }
   static ngTemplateGuard_observe: 'binding';
 
-
   constructor(
-      @Optional() @Inject(OBSERVE_DIRECTIVE_CONFIG) private readonly config: ObserveDirectiveConfig | null,
-      private readonly templateRef: TemplateRef<ObserveDirectiveContext<T>>,
-      private readonly viewContainerRef: ViewContainerRef,
-      private readonly cf: ComponentFactoryResolver
+    @Optional()
+    @Inject(OBSERVE_DIRECTIVE_CONFIG)
+    private readonly config: ObserveDirectiveConfig | null,
+    private readonly templateRef: TemplateRef<ObserveDirectiveContext<T>>,
+    private readonly viewContainerRef: ViewContainerRef,
+    private readonly cf: ComponentFactoryResolver
   ) {}
-
 
   ngOnInit(): void {
     if (!this.embeddedView) {
@@ -228,8 +253,13 @@ export class RxObserveDirective<T> implements OnInit, OnDestroy {
     }
 
     // todo refactor into smaller chunks
-    this.subscription.add(this.refreshEffect$$
-        .pipe(distinctUntilChanged(), mergeAll(), withLatestFrom(this.loadingTemplate$$.pipe(startWith(null))))
+    this.subscription.add(
+      this.refreshEffect$$
+        .pipe(
+          distinctUntilChanged(),
+          mergeAll(),
+          withLatestFrom(this.loadingTemplate$$.pipe(startWith(null)))
+        )
         .subscribe(([_, loadingTemplate]) => {
           this.context.loading = true;
           if (!this.rxObserveKeepValueOnLoading) {
@@ -237,14 +267,16 @@ export class RxObserveDirective<T> implements OnInit, OnDestroy {
           }
 
           if (this.config?.loadingComponent) {
-            const comp = this.cf.resolveComponentFactory(this.config.loadingComponent)
+            const comp = this.cf.resolveComponentFactory(
+              this.config.loadingComponent
+            );
             comp.create(this.createInjector());
 
             this.viewContainerRef.createComponent(comp);
           } else {
             this.embeddedView = this.viewContainerRef.createEmbeddedView(
-                loadingTemplate || this.templateRef,
-                this.context
+              loadingTemplate || this.templateRef,
+              this.context
             );
           }
 
@@ -254,88 +286,95 @@ export class RxObserveDirective<T> implements OnInit, OnDestroy {
             value: this.context.$implicit,
             error: this.context.error,
           });
-        }));
+        })
+    );
 
     // todo refactor into smaller chunks
     this.subscription = this.sourceWithOperator$
-        .pipe(
-            distinctUntilChanged(),
-            filter((v) => v !== undefined),
-            combineLatestWith(this.visible$)
-        )
-        .subscribe({
-          next: (val) => {
-            const v = val[0] as T | null;
-            const visible = val[1] ?? true;
-            /**
-             * only update the view if the value has changed and the view is visible
-             */
-            if (visible && v !== this.context.$implicit) {
-              if (v){
-                this.context.$implicit = v;
-                this.context.observe = v;
-              }
-
-              this.context.loading = false;
-              this.context.renderCount++;
-
-              this.viewContainerRef.clear();
-              this.embeddedView = this.viewContainerRef.createEmbeddedView(this.templateRef, this.context);
-
-              this.embeddedView.detectChanges();
-              this.renderCallback$$?.next({
-                renderCycle: 'next',
-                value: this.context.$implicit,
-                error: this.context.error,
-              });
+      .pipe(
+        distinctUntilChanged(),
+        filter((v) => v !== undefined),
+        combineLatestWith(this.visible$)
+      )
+      .subscribe({
+        next: (val) => {
+          const v = val[0] as T | null;
+          const visible = val[1] ?? true;
+          /**
+           * only update the view if the value has changed and the view is visible
+           */
+          if (visible && v !== this.context.$implicit) {
+            if (v) {
+              this.context.$implicit = v;
+              this.context.observe = v;
             }
-          },
-          error: (err) => {
-            this.context.error = err;
+
+            this.context.loading = false;
+            this.context.renderCount++;
+
             this.viewContainerRef.clear();
-            if (this.config?.errorComponent) {
-              const comp = this.cf.resolveComponentFactory(this.config.errorComponent)
-              comp.create(this.createInjector());
-
-              this.viewContainerRef.createComponent(comp);
-            } else {
-              this.embeddedView = this.viewContainerRef.createEmbeddedView(
-                  this.rxObserveErrorTemplate || this.templateRef,
-                  this.context
-              );
-            }
+            this.embeddedView = this.viewContainerRef.createEmbeddedView(
+              this.templateRef,
+              this.context
+            );
 
             this.embeddedView.detectChanges();
             this.renderCallback$$?.next({
-              renderCycle: 'error',
+              renderCycle: 'next',
               value: this.context.$implicit,
               error: this.context.error,
             });
-          },
-          complete: () => {
-            this.context.completed = true;
-            this.viewContainerRef.clear();
-            if (this.config?.completeComponent) {
-              const comp = this.cf.resolveComponentFactory(this.config.completeComponent)
-              comp.create(this.createInjector());
+          }
+        },
+        error: (err) => {
+          this.context.error = err;
+          this.viewContainerRef.clear();
+          if (this.config?.errorComponent) {
+            const comp = this.cf.resolveComponentFactory(
+              this.config.errorComponent
+            );
+            comp.create(this.createInjector());
 
-              this.viewContainerRef.createComponent(comp);
+            this.viewContainerRef.createComponent(comp);
+          } else {
+            this.embeddedView = this.viewContainerRef.createEmbeddedView(
+              this.rxObserveErrorTemplate || this.templateRef,
+              this.context
+            );
+          }
 
-            } else {
-              this.embeddedView = this.viewContainerRef.createEmbeddedView(
-                  this.rxObserveCompleteTemplate || this.templateRef,
-                  this.context
-              );
-            }
+          this.embeddedView.detectChanges();
+          this.renderCallback$$?.next({
+            renderCycle: 'error',
+            value: this.context.$implicit,
+            error: this.context.error,
+          });
+        },
+        complete: () => {
+          this.context.completed = true;
+          this.viewContainerRef.clear();
+          if (this.config?.completeComponent) {
+            const comp = this.cf.resolveComponentFactory(
+              this.config.completeComponent
+            );
+            comp.create(this.createInjector());
 
-            this.embeddedView.detectChanges();
-            this.renderCallback$$?.next({
-              renderCycle: 'complete',
-              value: this.context.$implicit,
-              error: this.context.error,
-            });
-          },
-        });
+            this.viewContainerRef.createComponent(comp);
+          } else {
+            this.embeddedView = this.viewContainerRef.createEmbeddedView(
+              this.rxObserveCompleteTemplate || this.templateRef,
+              this.context
+            );
+          }
+
+          this.embeddedView.detectChanges();
+          this.renderCallback$$?.next({
+            renderCycle: 'complete',
+            value: this.context.$implicit,
+            error: this.context.error,
+          });
+        },
+      });
   }
 
   private createInjector() {
@@ -345,7 +384,6 @@ export class RxObserveDirective<T> implements OnInit, OnDestroy {
           provide: OBSERVE_DIRECTIVE_CONTEXT,
           useValue: this.context,
         },
-
       ],
     });
   }
@@ -359,7 +397,10 @@ export class RxObserveDirective<T> implements OnInit, OnDestroy {
   }
 
   private createEmbeddedView(): void {
-    this.embeddedView = this.viewContainerRef.createEmbeddedView(this.templateRef, this.context);
+    this.embeddedView = this.viewContainerRef.createEmbeddedView(
+      this.templateRef,
+      this.context
+    );
     if (!this.rxObserveLazyViewCreation) {
       this.embeddedView.detectChanges();
     }
@@ -369,10 +410,8 @@ export class RxObserveDirective<T> implements OnInit, OnDestroy {
   }
 }
 
-
 @NgModule({
   declarations: [RxObserveDirective],
-  exports: [RxObserveDirective]
+  exports: [RxObserveDirective],
 })
 export class RxObserveDirectiveModule {}
-
