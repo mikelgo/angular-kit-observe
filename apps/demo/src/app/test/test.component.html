@@ -1,0 +1,18 @@
+<div *rxObserve="vm1$; let vm1; lazyViewCreation: true">
+  {{vm1 | json}}
+  <ul>
+    <li>totalelements {{vm1.totalElements}}</li>
+    <li>pageIndex {{vm1.pageIndex}}</li>
+    <li>loading {{vm1.loading}}</li>
+  </ul>
+
+</div>
+
+<div *rxObserve="vm2$; let vm2">
+  {{vm2 | json}}
+  <ul>
+    <li>totalelements {{vm2.totalElements}}</li>
+    <li>pageIndex {{vm2.pageIndex}}</li>
+    <li>loading {{vm2.loading}}</li>
+  </ul>
+</div>
