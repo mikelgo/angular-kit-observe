@@ -1,4 +1,4 @@
-# @angular-kit/stream
+# @angular-kit/rx-observe
 
 - ✅ Optimized change detection in comparison to `async` pipe
 - ✅ Lazy by default
@@ -10,7 +10,7 @@
 # Installation
 
 ```bash
-npm install @angular-kit/stream
+npm install @angular-kit/rx-observe
 ```
 
 ## Usage
@@ -28,7 +28,7 @@ npm install @angular-kit/stream
 
 ```html
 <ng-container
-  *stream="
+  *rxObserve="
     source$;
     let value;
   "
@@ -49,7 +49,7 @@ export class MyComponent {
 
 ```html
 <ng-container
-  *stream="
+  *rxObserve="
     source$;
     let value;
     let error = error;
@@ -83,7 +83,7 @@ export class MyComponent {
 
 ```html
 <ng-container
-  *stream="
+  *rxObserve="
     source$;
     renderCallback: renderCallback$$
   "
@@ -124,12 +124,12 @@ export class MyComponent {
 
 ### Configuration
 
-You can configure `stream` to use defined components for loading, error and complete states instead of passing templates.
+You can configure `rxObserve` to use defined components for loading, error and complete states instead of passing templates.
 
 ```typescript
 @NgModule({
   providers: [
-    provideStreamDirectiveConfig({
+    provideObserveDirectiveConfig({
       loadingComponent: MyLoadingComponent,
       errorComponent: MyErrorComponent,
       completeComponent: MyCompleteComponent,
@@ -139,7 +139,7 @@ You can configure `stream` to use defined components for loading, error and comp
 export class AppModule {}
 ```
 
-In your custom components you have access to the context via `STREAM_DIR_CONTEXT` injection token.
+In your custom components you have access to the context via `OBSERVE_DIRECTIVE_CONTEXT` injection token.
 
 ```typescript
 @Component({
@@ -147,14 +147,14 @@ In your custom components you have access to the context via `STREAM_DIR_CONTEXT
   template: ` <div *ngIf="loading">Loading... {{ context.loading }}</div> `,
 })
 export class MyLoadingComponent {
-  context = injectStreamDirectiveContext();
+  context = injectObserveDirectiveContext();
   
 }
 ```
 
 _Note_ When using components and passing templates, the templates will be used instead.
 
-#### `StreamDirectiveConfig` options
+#### `ObserveDirectiveConfig` options
 
 - `loadingComponent` - Component that will be used to render loading state.
 - `errorComponent` - Component that will be used to render error state.
@@ -200,16 +200,16 @@ This strategy is based on the `IntersectionObserver` API. If the browser does no
 - `threshold`: threshold, see [MDN](https://developer.mozilla.org/en-US/docs/Web/API/IntersectionObserver/IntersectionObserver)
 - `root`:  root element, see [MDN](https://developer.mozilla.org/en-US/docs/Web/API/IntersectionObserver/IntersectionObserver)
 
-## Comparison of `async`-pipe vs `*stream`-directive
+## Comparison of `async`-pipe vs `*rxObserve`-directive
 
 If we compare a highly optimized application where all components are using `OnPush` change detection strategy we can observe that the
 usage of the `async`-pipe is still quite expensive at it is internally calling `markForCheck` which marks the component itself and all of its parents for change detection.
 So the whole component (sub)-tree gets re-rendered. So not only the complete template of the affected component gets re-rendered but also its parents.
 
-`*stream` on the other hand will only update the affected tiny template-piece:
+`*rxObserve` on the other hand will only update the affected tiny template-piece:
 ![async-pipe vs stream-directive](./docs/stream-vs-async.png)
 
-### Comparison of dirty checks: `async`-pipe vs `*stream`-directive
+### Comparison of dirty checks: `async`-pipe vs `*rxObserve`-directive
 The numbers in the green circels cound the render-cycles. Please not on the right side where only the tiny template
 piece within `L2 Component` gets updated (the number on the left besides this name does not increase).
 
