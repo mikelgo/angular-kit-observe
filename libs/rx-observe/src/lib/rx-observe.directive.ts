@@ -160,8 +160,8 @@ export class RxObserveDirective<T> implements OnInit, OnDestroy {
   private embeddedView!: EmbeddedViewRef<ObserveDirectiveContext<T>>;
 
   private context: ObserveDirectiveContext<T> = {
-    $implicit: undefined as unknown as T,
-    observe: undefined as unknown as T,
+    $implicit: {} as T,
+    observe: {} as T,
     error: undefined,
     completed: false,
     loading: false,
