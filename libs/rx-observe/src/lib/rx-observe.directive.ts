@@ -298,7 +298,7 @@ export class RxObserveDirective<T> implements OnInit, OnDestroy {
       )
       .subscribe({
         next: (val) => {
-          const v = val[0] as T | null;
+          const v = val[0] as T;
           const visible = val[1] ?? true;
           /**
            * only update the view if the value has changed and the view is visible
