@@ -83,12 +83,11 @@ async function setup(cfg?: {
   await TestBed.configureTestingModule({
     imports: [RxObserveDirectiveModule],
     providers: [
-      provideRxObserveDirectiveConfig(
-        cfg?.streamConfig as RxObserveDirectiveConfig
-      ),
+        provideRxObserveDirectiveConfig(cfg?.streamConfig as RxObserveDirectiveConfig),
     ],
     declarations: [TestHostComponent, DirtyCheckerComponent],
-  });
+    teardown: { destroyAfterEach: false }
+});
 
   return {
     render: () => {
