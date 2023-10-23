@@ -1,5 +1,5 @@
 {
-  "npmScope": "observe5",
+  "npmScope": "rxObserve",
   "affected": {
     "defaultBase": "master"
   },
