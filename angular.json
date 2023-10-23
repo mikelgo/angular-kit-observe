@@ -5,7 +5,7 @@
       "projectType": "application",
       "root": "apps/demo",
       "sourceRoot": "apps/demo/src",
-      "prefix": "observe5",
+      "prefix": "demo",
       "architect": {
         "build": {
           "builder": "@angular-devkit/build-angular:browser",
@@ -120,7 +120,7 @@
       "projectType": "library",
       "root": "libs/rx-observe",
       "sourceRoot": "libs/rx-observe/src",
-      "prefix": "observe5",
+      "prefix": "rx-observe",
       "architect": {
         "build": {
           "builder": "@nrwl/angular:package",
