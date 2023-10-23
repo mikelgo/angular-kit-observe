@@ -1,7 +1,4 @@
-import {
-  RxObserveDirective,
-  RxObserveDirectiveModule,
-} from './rx-observe.directive';
+import { RxObserveDirective } from './rx-observe.directive';
 import { createHostFactory, SpectatorHost } from '@ngneat/spectator';
 import {
   BehaviorSubject,
@@ -500,7 +497,7 @@ function createConfig(
 async function createSetup(config?: RxObserveDirectiveConfig) {
   await TestBed.configureTestingModule({
     declarations: [TestHostComponent],
-    imports: [HttpClientTestingModule, RxObserveDirectiveModule],
+    imports: [HttpClientTestingModule, RxObserveDirective],
     providers: [
       provideRxObserveDirectiveConfig(config as RxObserveDirectiveConfig),
       ValueProvider,
@@ -520,7 +517,7 @@ async function createSetup(config?: RxObserveDirectiveConfig) {
 
 async function setupDirective(config?: RxObserveDirectiveConfig) {
   await TestBed.configureTestingModule({
-    imports: [HttpClientTestingModule, RxObserveDirectiveModule],
+    imports: [HttpClientTestingModule, RxObserveDirective],
     providers: [
       RxObserveDirective,
       provideRxObserveDirectiveConfig(config as RxObserveDirectiveConfig),

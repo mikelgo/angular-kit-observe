@@ -1,4 +1,4 @@
-import { InjectionToken, Provider, Type } from '@angular/core';
+import { inject, InjectionToken, Provider, Type } from '@angular/core';
 import { ObserveDirectiveContext } from './types/observe-directive-context';
 import { RenderStrategies } from './types/render-strategies';
 
@@ -29,4 +29,12 @@ export function provideRxObserveDirectiveContext<T>(
   context: ObserveDirectiveContext<T>
 ): Provider {
   return { provide: RX_OBSERVE_DIRECTIVE_CONTEXT, useValue: context };
+}
+
+export function injectStreamDirectiveConfig(): RxObserveDirectiveConfig | null {
+  return inject(RX_OBSERVE_DIRECTIVE_CONFIG, { optional: true });
+}
+
+export function injectStreamDirectiveContext<T>(): ObserveDirectiveContext<T> {
+  return inject(RX_OBSERVE_DIRECTIVE_CONTEXT);
 }

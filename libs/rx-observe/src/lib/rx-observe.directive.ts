@@ -1,14 +1,11 @@
 import {
-  ComponentFactoryResolver,
   Directive,
   EmbeddedViewRef,
-  Inject,
+  inject,
   Injector,
   Input,
-  NgModule,
   OnDestroy,
   OnInit,
-  Optional,
   TemplateRef,
   ViewContainerRef,
 } from '@angular/core';
@@ -31,7 +28,7 @@ import {
   withLatestFrom,
 } from 'rxjs/operators';
 import {
-  RX_OBSERVE_DIRECTIVE_CONFIG,
+  injectStreamDirectiveConfig,
   RX_OBSERVE_DIRECTIVE_CONTEXT,
   RxObserveDirectiveConfig,
 } from './rx-observe-directive-config';
@@ -48,8 +45,16 @@ import { supportsIntersectionObserver } from './util/supports-intersection-obser
 
 @Directive({
   selector: '[rxObserve]',
+  standalone: true,
 })
 export class RxObserveDirective<T> implements OnInit, OnDestroy {
+  private readonly config: RxObserveDirectiveConfig | null =
+    injectStreamDirectiveConfig();
+  private readonly templateRef: TemplateRef<ObserveDirectiveContext<T>> =
+    inject(TemplateRef<ObserveDirectiveContext<T>>);
+  private readonly viewContainerRef: ViewContainerRef =
+    inject(ViewContainerRef);
+
   private source$$ = new ReplaySubject<Observable<T | null>>(1);
   private refreshEffect$$ = new ReplaySubject<Subject<any>>(1);
   private loadingTemplate$$ = new ReplaySubject<
@@ -229,23 +234,13 @@ export class RxObserveDirective<T> implements OnInit, OnDestroy {
       );
     })
   );
-
+  static ngTemplateGuard_rxObserve: 'binding';
   static ngTemplateContextGuard<T>(
     directive: RxObserveDirective<T>,
     context: unknown
   ): context is ObserveDirectiveContext<T> {
     return true;
   }
-  static ngTemplateGuard_observe: 'binding';
-
-  constructor(
-    @Optional()
-    @Inject(RX_OBSERVE_DIRECTIVE_CONFIG)
-    private readonly config: RxObserveDirectiveConfig | null,
-    private readonly templateRef: TemplateRef<ObserveDirectiveContext<T>>,
-    private readonly viewContainerRef: ViewContainerRef,
-    private readonly cf: ComponentFactoryResolver
-  ) {}
 
   ngOnInit(): void {
     if (!this.embeddedView) {
@@ -267,12 +262,12 @@ export class RxObserveDirective<T> implements OnInit, OnDestroy {
           }
 
           if (this.config?.loadingComponent) {
-            const comp = this.cf.resolveComponentFactory(
-              this.config.loadingComponent
+            this.viewContainerRef.createComponent(
+              this.config.loadingComponent,
+              {
+                injector: this.createInjector(),
+              }
             );
-            comp.create(this.createInjector());
-
-            this.viewContainerRef.createComponent(comp);
           } else {
             this.embeddedView = this.viewContainerRef.createEmbeddedView(
               loadingTemplate || this.templateRef,
@@ -330,12 +325,9 @@ export class RxObserveDirective<T> implements OnInit, OnDestroy {
           this.context.error = err;
           this.viewContainerRef.clear();
           if (this.config?.errorComponent) {
-            const comp = this.cf.resolveComponentFactory(
-              this.config.errorComponent
-            );
-            comp.create(this.createInjector());
-
-            this.viewContainerRef.createComponent(comp);
+            this.viewContainerRef.createComponent(this.config.errorComponent, {
+              injector: this.createInjector(),
+            });
           } else {
             this.embeddedView = this.viewContainerRef.createEmbeddedView(
               this.rxObserveErrorTemplate || this.templateRef,
@@ -354,12 +346,12 @@ export class RxObserveDirective<T> implements OnInit, OnDestroy {
           this.context.completed = true;
           this.viewContainerRef.clear();
           if (this.config?.completeComponent) {
-            const comp = this.cf.resolveComponentFactory(
-              this.config.completeComponent
+            this.viewContainerRef.createComponent(
+              this.config.completeComponent,
+              {
+                injector: this.createInjector(),
+              }
             );
-            comp.create(this.createInjector());
-
-            this.viewContainerRef.createComponent(comp);
           } else {
             this.embeddedView = this.viewContainerRef.createEmbeddedView(
               this.rxObserveCompleteTemplate || this.templateRef,
@@ -409,9 +401,3 @@ export class RxObserveDirective<T> implements OnInit, OnDestroy {
     }
   }
 }
-
-@NgModule({
-  declarations: [RxObserveDirective],
-  exports: [RxObserveDirective],
-})
-export class RxObserveDirectiveModule {}
