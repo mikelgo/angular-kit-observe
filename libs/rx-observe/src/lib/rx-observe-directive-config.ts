@@ -2,7 +2,7 @@ import { InjectionToken, Provider, Type } from '@angular/core';
 import { ObserveDirectiveContext } from './types/observe-directive-context';
 import { RenderStrategies } from './types/render-strategies';
 
-export interface ObserveDirectiveConfig {
+export interface RxObserveDirectiveConfig {
   loadingComponent?: Type<any>;
   errorComponent?: Type<any>;
   completeComponent?: Type<any>;
@@ -11,22 +11,22 @@ export interface ObserveDirectiveConfig {
   renderStrategy?: RenderStrategies;
 }
 
-export const OBSERVE_DIRECTIVE_CONFIG =
-  new InjectionToken<ObserveDirectiveConfig>('OBSERVE_DIRECTIVE_CONFIG');
+export const RX_OBSERVE_DIRECTIVE_CONFIG =
+  new InjectionToken<RxObserveDirectiveConfig>('RX_OBSERVE_DIRECTIVE_CONFIG');
 
 // todo fix any
-export const OBSERVE_DIRECTIVE_CONTEXT = new InjectionToken<
+export const RX_OBSERVE_DIRECTIVE_CONTEXT = new InjectionToken<
   ObserveDirectiveContext<any>
 >('OBSERVE_DIRECTIVE_CONTEXT');
 
-export function provideObserveDirectiveConfig(
-  config: ObserveDirectiveConfig
+export function provideRxObserveDirectiveConfig(
+  config: RxObserveDirectiveConfig
 ): Provider {
-  return { provide: OBSERVE_DIRECTIVE_CONFIG, useValue: config };
+  return { provide: RX_OBSERVE_DIRECTIVE_CONFIG, useValue: config };
 }
 
-export function provideObserveDirectiveContext<T>(
+export function provideRxObserveDirectiveContext<T>(
   context: ObserveDirectiveContext<T>
 ): Provider {
-  return { provide: OBSERVE_DIRECTIVE_CONTEXT, useValue: context };
+  return { provide: RX_OBSERVE_DIRECTIVE_CONTEXT, useValue: context };
 }

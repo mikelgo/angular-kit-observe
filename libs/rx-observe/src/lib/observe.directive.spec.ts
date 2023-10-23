@@ -1,5 +1,8 @@
-import {RxObserveDirective, RxObserveDirectiveModule} from './rx-observe.directive';
-import {createHostFactory, SpectatorHost} from '@ngneat/spectator';
+import {
+  RxObserveDirective,
+  RxObserveDirectiveModule,
+} from './rx-observe.directive';
+import { createHostFactory, SpectatorHost } from '@ngneat/spectator';
 import {
   BehaviorSubject,
   EMPTY,
@@ -7,41 +10,48 @@ import {
   of,
   ReplaySubject,
   Subject,
-  throwError
+  throwError,
 } from 'rxjs';
+import { delay, mergeAll, scan, switchMap, takeUntil } from 'rxjs/operators';
+import { TestBed, waitForAsync } from '@angular/core/testing';
 import {
-  delay,
-  mergeAll,
-  scan,
-  switchMap,
-  takeUntil,
-} from 'rxjs/operators';
-import {TestBed, waitForAsync} from '@angular/core/testing';
-import {Component, Inject, Injectable, TemplateRef, ViewContainerRef} from '@angular/core';
-import {HttpClient} from '@angular/common/http';
+  Component,
+  Inject,
+  Injectable,
+  TemplateRef,
+  ViewContainerRef,
+} from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 import {
-    provideObserveDirectiveConfig,
-    ObserveDirectiveConfig, OBSERVE_DIRECTIVE_CONTEXT
-} from './observe-directive-config';
-import {HttpClientTestingModule} from '@angular/common/http/testing';
-import {By} from '@angular/platform-browser';
-import {subscribeSpyTo} from '@hirez_io/observer-spy';
-import {RenderContext} from "./types/render-context";
-import {ObserveDirectiveContext} from "./types/observe-directive-context";
-import {TestViewContainerRef} from "../__test__/utils/mock-vcr";
-import {TestTemplateRef} from "../__test__/utils/mock-templateref";
-import {ThrottleRenderStrategy, ViewportRenderStrategy} from "./types/render-strategies";
+  provideRxObserveDirectiveConfig,
+  RX_OBSERVE_DIRECTIVE_CONTEXT,
+  RxObserveDirectiveConfig,
+} from './rx-observe-directive-config';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { By } from '@angular/platform-browser';
+import { subscribeSpyTo } from '@hirez_io/observer-spy';
+import { RenderContext } from './types/render-context';
+import { ObserveDirectiveContext } from './types/observe-directive-context';
+import { TestViewContainerRef } from '../__test__/utils/mock-vcr';
+import { TestTemplateRef } from '../__test__/utils/mock-templateref';
+import {
+  ThrottleRenderStrategy,
+  ViewportRenderStrategy,
+} from './types/render-strategies';
 
 describe('StreamDirective', () => {
   describe('Basic', () => {
     const hostFactory = createHostFactory(RxObserveDirective);
 
     it('should subscribe to source', () => {
-      const host = hostFactory(`<div *rxObserve="source; let value">{{ value?.id }}</div>`, {
-        hostProps: {
-          source: createSource(),
-        },
-      });
+      const host = hostFactory(
+        `<div *rxObserve="source; let value">{{ value?.id }}</div>`,
+        {
+          hostProps: {
+            source: createSource(),
+          },
+        }
+      );
       expect(html(host)).toContain('1');
     });
     describe('context', () => {
@@ -292,7 +302,9 @@ describe('StreamDirective', () => {
       const { valueProvider, fixture } = await createSetup(createConfig());
       valueProvider.provideErrorSource();
       fixture.detectChanges();
-      expect(fixture.debugElement.query(By.css('div')).nativeElement?.innerHTML).toContain('Error: 🔥');
+      expect(
+        fixture.debugElement.query(By.css('div')).nativeElement?.innerHTML
+      ).toContain('Error: 🔥');
     }));
     // todo
     xit('should show loading component', waitForAsync(async () => {
@@ -302,7 +314,9 @@ describe('StreamDirective', () => {
 
       valueProvider.refreshSignal.next(10);
       fixture.detectChanges();
-      expect(fixture.debugElement.query(By.css('div')).nativeElement?.innerHTML).toContain('Loading... context ');
+      expect(
+        fixture.debugElement.query(By.css('div')).nativeElement?.innerHTML
+      ).toContain('Loading... context ');
     }));
     // todo
     // eslint-disable-next-line @typescript-eslint/no-empty-function
@@ -317,11 +331,13 @@ describe('StreamDirective', () => {
         expect(directive.observeKeepValueOnLoading).toEqual(false);
       });
       it('should have config value', async () => {
-        const { directive } = await setupDirective(createConfig({keepValueOnLoading: true}));
+        const { directive } = await setupDirective(
+          createConfig({ keepValueOnLoading: true })
+        );
 
         expect(directive.observeKeepValueOnLoading).toEqual(true);
       });
-    })
+    });
     describe('lazyViewCreation', () => {
       it('should be false if config is not set', async () => {
         const { directive } = await setupDirective(createConfig());
@@ -329,36 +345,37 @@ describe('StreamDirective', () => {
         expect(directive.observeLazyViewCreation).toEqual(false);
       });
       it('should have config value', async () => {
-        const { directive } = await setupDirective(createConfig({lazyViewCreation: true}));
+        const { directive } = await setupDirective(
+          createConfig({ lazyViewCreation: true })
+        );
 
         expect(directive.observeLazyViewCreation).toEqual(true);
       });
-    })
+    });
     describe('renderStrategy', () => {
       it('should be DefaultRenderStrategy if config is not set', async () => {
         const { directive } = await setupDirective(createConfig());
 
         const result = subscribeSpyTo(directive.renderStrategy$);
 
-        expect(result.getLastValue()).toEqual({type: 'default'});
+        expect(result.getLastValue()).toEqual({ type: 'default' });
       });
 
       it('should have config value', async () => {
         const renderStrategy: ThrottleRenderStrategy = {
           type: 'throttle',
-          throttleInMs: 100
-        }
-        const { directive } = await setupDirective(createConfig({renderStrategy}));
-
+          throttleInMs: 100,
+        };
+        const { directive } = await setupDirective(
+          createConfig({ renderStrategy })
+        );
 
         const result = subscribeSpyTo(directive.renderStrategy$);
 
         expect(result.getLastValue()).toEqual(renderStrategy);
       });
-
-    })
-
-  })
+    });
+  });
 
   describe('RenderStrategies', () => {
     describe('renderStrategy$', () => {
@@ -367,19 +384,19 @@ describe('StreamDirective', () => {
 
         const result = subscribeSpyTo(directive.renderStrategy$);
 
-        expect(result.getLastValue()).toEqual({type: 'default'});
+        expect(result.getLastValue()).toEqual({ type: 'default' });
       });
 
       it('should be derived from renderStrategy$$', async () => {
         const { directive } = await setupDirective(createConfig());
         const throttleRenderStrategy: ThrottleRenderStrategy = {
           type: 'throttle',
-          throttleInMs: 100
-        }
+          throttleInMs: 100,
+        };
         const viewPortStrategy: ViewportRenderStrategy = {
           type: 'viewport',
-          threshold: 10
-        }
+          threshold: 10,
+        };
 
         const result = subscribeSpyTo(directive.renderStrategy$);
 
@@ -387,12 +404,12 @@ describe('StreamDirective', () => {
         directive.observeRenderStrategy = viewPortStrategy;
 
         expect(result.getValues()).toEqual([
-          {type: 'default'},
+          { type: 'default' },
           throttleRenderStrategy,
-          viewPortStrategy
+          viewPortStrategy,
         ]);
       });
-    })
+    });
 
     describe('isViewPortStrategy$', () => {
       it('should be false by default', async () => {
@@ -409,12 +426,12 @@ describe('StreamDirective', () => {
 
         directive.observeRenderStrategy = {
           type: 'viewport',
-          threshold: 10
-        }
+          threshold: 10,
+        };
 
         expect(result.getLastValue()).toEqual(true);
       });
-    })
+    });
 
     describe('viewPortObserver$', () => {
       it('should emit null by default', async () => {
@@ -424,7 +441,7 @@ describe('StreamDirective', () => {
 
         expect(result.getLastValue()).toEqual(null);
       });
-  /*    it('should emit IntersectionObserver when ViewPortStrategy is set', async () => {
+      /*    it('should emit IntersectionObserver when ViewPortStrategy is set', async () => {
         const { directive } = await setupDirective(createConfig());
         mockIntersectionObserver();
         const result = subscribeSpyTo(directive.viewPortObserver$);
@@ -438,12 +455,17 @@ describe('StreamDirective', () => {
 
         expect(result.getLastValue()).not.toEqual(null);
       });*/
-    })
+    });
   });
 });
 
-function createSource(cfg?: { data?: Partial<TestModel>; completeSignal?: Subject<boolean> }): Observable<TestModel> {
-  return of(createValue(cfg?.data)).pipe(takeUntil(cfg?.completeSignal ?? new Subject<boolean>()));
+function createSource(cfg?: {
+  data?: Partial<TestModel>;
+  completeSignal?: Subject<boolean>;
+}): Observable<TestModel> {
+  return of(createValue(cfg?.data)).pipe(
+    takeUntil(cfg?.completeSignal ?? new Subject<boolean>())
+  );
 }
 
 function createValue(cfg?: Partial<TestModel>): TestModel {
@@ -462,23 +484,25 @@ function html(host: SpectatorHost<any>) {
   return host.query('div')?.innerHTML;
 }
 
-function createConfig(cfg?: ObserveDirectiveConfig): ObserveDirectiveConfig{
+function createConfig(
+  cfg?: RxObserveDirectiveConfig
+): RxObserveDirectiveConfig {
   const baseConfig = {
     loadingComponent: LoadingComponent,
     errorComponent: ErrorComponent,
   };
 
-  const mergedConfig = {...baseConfig, ...cfg};
+  const mergedConfig = { ...baseConfig, ...cfg };
 
   return mergedConfig;
 }
 
-async function createSetup(config?: ObserveDirectiveConfig) {
+async function createSetup(config?: RxObserveDirectiveConfig) {
   await TestBed.configureTestingModule({
     declarations: [TestHostComponent],
     imports: [HttpClientTestingModule, RxObserveDirectiveModule],
     providers: [
-      provideObserveDirectiveConfig(config as ObserveDirectiveConfig),
+      provideRxObserveDirectiveConfig(config as RxObserveDirectiveConfig),
       ValueProvider,
     ],
   }).compileComponents();
@@ -494,12 +518,12 @@ async function createSetup(config?: ObserveDirectiveConfig) {
   };
 }
 
-async function setupDirective(config?: ObserveDirectiveConfig) {
+async function setupDirective(config?: RxObserveDirectiveConfig) {
   await TestBed.configureTestingModule({
     imports: [HttpClientTestingModule, RxObserveDirectiveModule],
     providers: [
       RxObserveDirective,
-      provideObserveDirectiveConfig(config as ObserveDirectiveConfig),
+      provideRxObserveDirectiveConfig(config as RxObserveDirectiveConfig),
       {
         provide: ViewContainerRef,
         useValue: new TestViewContainerRef(),
@@ -507,15 +531,14 @@ async function setupDirective(config?: ObserveDirectiveConfig) {
       {
         provide: TemplateRef,
         useValue: new TestTemplateRef(),
-      }
+      },
     ],
   }).compileComponents();
 
-
-  const directive = TestBed.get(RxObserveDirective)
+  const directive = TestBed.get(RxObserveDirective);
 
   return {
-    directive
+    directive,
   };
 }
 
@@ -528,7 +551,9 @@ export class ValueProvider {
   refreshSignal$ = this.refreshSignal.pipe(scan((acc, value) => acc + 1, 0));
   constructor(private http: HttpClient) {}
   provideRefreshSource() {
-    this.sourceProvider$$.next(this.refreshSignal$.pipe(switchMap((n) => this.getPost(n))));
+    this.sourceProvider$$.next(
+      this.refreshSignal$.pipe(switchMap((n) => this.getPost(n)))
+    );
   }
 
   provideErrorSource() {
@@ -536,7 +561,9 @@ export class ValueProvider {
   }
 
   getPost(n: number) {
-    return this.http.get(`https://jsonplaceholder.typicode.com/posts/${n}`).pipe(delay(1000));
+    return this.http
+      .get(`https://jsonplaceholder.typicode.com/posts/${n}`)
+      .pipe(delay(1000));
   }
 }
 
@@ -566,7 +593,6 @@ export class ValueProvider {
   `,
 })
 export class TestHostComponent {
-
   source$ = this.valueProvider.source$;
   constructor(public valueProvider: ValueProvider) {}
 }
@@ -577,10 +603,10 @@ export class TestHostComponent {
   template: ` <div>Loading... context {{ context?.loading }}</div> `,
 })
 export class LoadingComponent {
-
-
-  constructor(@Inject(OBSERVE_DIRECTIVE_CONTEXT) public readonly context: ObserveDirectiveContext<TestModel>) {}
-
+  constructor(
+    @Inject(RX_OBSERVE_DIRECTIVE_CONTEXT)
+    public readonly context: ObserveDirectiveContext<TestModel>
+  ) {}
 }
 
 @Component({
@@ -589,7 +615,8 @@ export class LoadingComponent {
   template: ` <div>Error: context {{ context?.error }}</div> `,
 })
 export class ErrorComponent {
-    constructor(@Inject(OBSERVE_DIRECTIVE_CONTEXT) public readonly context: ObserveDirectiveContext<TestModel>) {}
+  constructor(
+    @Inject(RX_OBSERVE_DIRECTIVE_CONTEXT)
+    public readonly context: ObserveDirectiveContext<TestModel>
+  ) {}
 }
-
-

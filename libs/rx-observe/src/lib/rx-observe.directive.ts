@@ -31,10 +31,10 @@ import {
   withLatestFrom,
 } from 'rxjs/operators';
 import {
-  OBSERVE_DIRECTIVE_CONFIG,
-  OBSERVE_DIRECTIVE_CONTEXT,
-  ObserveDirectiveConfig,
-} from './observe-directive-config';
+  RX_OBSERVE_DIRECTIVE_CONFIG,
+  RX_OBSERVE_DIRECTIVE_CONTEXT,
+  RxObserveDirectiveConfig,
+} from './rx-observe-directive-config';
 import {
   isViewportRenderStrategy,
   RenderStrategies,
@@ -240,8 +240,8 @@ export class RxObserveDirective<T> implements OnInit, OnDestroy {
 
   constructor(
     @Optional()
-    @Inject(OBSERVE_DIRECTIVE_CONFIG)
-    private readonly config: ObserveDirectiveConfig | null,
+    @Inject(RX_OBSERVE_DIRECTIVE_CONFIG)
+    private readonly config: RxObserveDirectiveConfig | null,
     private readonly templateRef: TemplateRef<ObserveDirectiveContext<T>>,
     private readonly viewContainerRef: ViewContainerRef,
     private readonly cf: ComponentFactoryResolver
@@ -381,7 +381,7 @@ export class RxObserveDirective<T> implements OnInit, OnDestroy {
     return Injector.create({
       providers: [
         {
-          provide: OBSERVE_DIRECTIVE_CONTEXT,
+          provide: RX_OBSERVE_DIRECTIVE_CONTEXT,
           useValue: this.context,
         },
       ],
