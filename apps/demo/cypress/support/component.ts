@@ -15,3 +15,14 @@
 
 // Import commands.ts using ES2015 syntax:
 import './commands';
+import { mount } from 'cypress/angular';
+
+declare global {
+  namespace Cypress {
+    interface Chainable {
+      mount: typeof mount;
+    }
+  }
+}
+
+Cypress.Commands.add('mount', mount);
