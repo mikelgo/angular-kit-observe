@@ -1,105 +1,223 @@
+# @angular-kit/rx-observe
+
+- ✅ Optimized change detection in comparison to `async` pipe
+- ✅ Lazy by default
+- ✅ Render strategies to further push change detection optimization
+- ✅ Loading, error and complete state
+- ✅ Easy template customization via ng-templates or components for e.g. spinners
+- ✅ no third-party dependencies
+
+# Installation
+
+```bash
+npm install @angular-kit/rx-observe
+```
+
+## Usage
+
+### Basic example
+
+❌ Instead of doing this
+```html
+<ng-container *ngIf="source | async as value">
+  {{ value  }}
+</ng-container>
+```
+
+✅ Do this:
+
+```html
+<ng-container
+  *rxObserve="
+    source$;
+    let value;
+  "
+>
+  {{ value }}
+</ng-container>
+
+```
+
+```typescript
+@Component({})
+export class MyComponent {
+  source$ = this.http.get('https://jsonplaceholder.typicode.com/posts/1');
+}
+```
+
+### Advanced example
+
+```html
+<ng-container
+  *rxObserve="
+    source$;
+    let value;
+    let error = error;
+    let complete = completed;
+    let loading = loading;
+    loadingTemplate: loadingTemplate;
+    errorTemplate: errorTemplate;
+    completeTemplate: completeTemplate;
+    keepValueOnLoading: true;
+    renderStrategy: {type: 'throttle', throttleInMs: 250}
+  "
+>
+  {{ value }}
+</ng-container>
+
+<ng-template #loadingTemplate let-loading="loading">
+  <my-spinner [loading]="loading"></my-spinner>
+</ng-template>
+<ng-template #errorTemplate let-error="error"> error context: {{ error }} </ng-template>
+<ng-template #completeTemplate let-completed="completed"> completed context: {{ completed }} </ng-template>
+```
+
+```typescript
+@Component({})
+export class MyComponent {
+  source$ = this.http.get('https://jsonplaceholder.typicode.com/posts/1');
+}
+```
+
+### using `renderCallback`
+
+```html
+<ng-container
+  *rxObserve="
+    source$;
+    renderCallback: renderCallback$$
+  "
+>
+  {{ value }}
+</ng-container>
+
+```
+
+```typescript
+@Component({})
+export class MyComponent {
+  source$ = this.http.get('https://jsonplaceholder.typicode.com/posts/1');
+  renderCallback$$ = new ReplaySubject<RenderContext>(1)
+}
+```
+
+### API
+
+#### Inputs
+
+- `source$` - Observable that will be subscribed to
+- `keepValueOnLoading` - If `true` the last value will be kept on loading state. If `false` the last value will be cleared on loading state. Default value is `false`.
+- `refreshSignal` - Subject that will be used to trigger refresh.
+- `loadingTemplate` - Template that will be used to render loading state.
+- `errorTemplate` - Template that will be used to render error state.
+- `completeTemplate` - Template that will be used to render complete state.
+- `lazyViewCreation` - If `true` the view will be created only when the observable emits. If `false` the view will be created on init. Default value is `true`.
+- `renderCallback` - can be configured by passing a `Subject` and this will emit everytime a `RenderContext`-value whenever a rendering happens. `RenderContext` contains the `value`, `error` and the render context. The render context does contain a information when the re-rendering has happened: `before-next`: before the next value arrives; `next`: when the next value has arrived; `error`: when an error occoured.
+- `renderStrategy` - a configuration to further push change detection. See `render strategy` section below
+
+#### Context variables
+
+- `$implicit` - Last value emitted by `source$`
+- `error` - Error emitted by `source$`
+- `completed` - `true` if `source$` completed
+- `loading` - `true` if `source$` is loading
+
+### Configuration
+
+You can configure `rxObserve` to use defined components for loading, error and complete states instead of passing templates.
+
+```typescript
+@NgModule({
+  providers: [
+    provideObserveDirectiveConfig({
+      loadingComponent: MyLoadingComponent,
+      errorComponent: MyErrorComponent,
+      completeComponent: MyCompleteComponent,
+    }),
+  ],
+})
+export class AppModule {}
+```
+
+In your custom components you have access to the context via `OBSERVE_DIRECTIVE_CONTEXT` injection token.
+
+```typescript
+@Component({
+  selector: 'my-loading',
+  template: ` <div *ngIf="loading">Loading... {{ context.loading }}</div> `,
+})
+export class MyLoadingComponent {
+  context = injectObserveDirectiveContext();
+  
+}
+```
+
+_Note_ When using components and passing templates, the templates will be used instead.
+
+#### `ObserveDirectiveConfig` options
+
+- `loadingComponent` - Component that will be used to render loading state.
+- `errorComponent` - Component that will be used to render error state.
+- `completeComponent` - Component that will be used to render complete state.
+- `keepValueOnLoading` - config to define if the current rendered value should be kept when the value source is in a loading state or not. Default is false.
+- `lazyViewCreation` - config to define if the view should be created only when the value source emits a value. Default is `true`.
+- `renderStrategy` - a configuration to further push change detection. See `render strategy` section below.
+
+### Render strategies
+A `RenderStrategy` can be used to minimize change detection cycles. There are four strategies supported:
+* `DefaultRenderStrategy` - the default strategy ( a local change detection strategy).
+* `ThrottleRenderStrategy` - a strategy which throttles the change detections by a defined time interval.
+* `DebounceRenderStrategy` - strategy which debounces the change detection cycles by a given time interval.
+* `ViewPortRenderStrategy` - this strategy does only trigger change detection when an element is visible within the viewport. If the element is visible within the viewport, the element uses the `DefaultRenderStrategy` as long as it is visible.
 
 
-# Observe5
+> **Warning**
+> The `RenderStrategy` can be switched on runtime. However there is currently some unexpected behaivor: When using `ThrottleRenderStrategy` or `DebounceRenderStrategy` and then switching to `ViewPortRenderStrategy`, the strategies are accumulated. Means the change detections are throttled/debounced and only detected when visible within the viewport. Only a switch to `DefaultRenderStrategy` in between does result in a correct behaivor. This is a bug and will be fixed in a future version!
 
-This project was generated using [Nx](https://nx.dev).
+#### `DefaultRenderStrategy`
+![default render strategy](./docs/default-render-strategy.gif)
 
-<p style="text-align: center;"><img src="https://raw.githubusercontent.com/nrwl/nx/master/images/nx-logo.png" width="450"></p>
+##### Configuration
+No Options available.
 
-🔎 **Smart, Extensible Build Framework**
+### `ThrottleRenderStrategy`
+![throttle render strategy](./docs/throttle-render-strategy.gif)
 
-## Quick Start & Documentation
+##### Configuration
+* `throttleInMs` - the time interval in milliseconds to throttle the change detection cycles.
+### `DebounceRenderStrategy`
+![debounce render strategy](./docs/debounce-render-strategy.gif)
 
-[Nx Documentation](https://nx.dev/angular)
+##### Configuration
+* `debounceInMs` - the time interval in milliseconds to debounce the change detection cycles.
+### `ViewPortRenderStrategy`
+![viewport render strategy](./docs/viewport-render-strategy.gif)
 
-[10-minute video showing all Nx features](https://nx.dev/getting-started/intro)
+##### Configuration
+This strategy is based on the `IntersectionObserver` API. If the browser does not support this API the strategy falls back to `DefaultRenderStrategy`.
 
-[Interactive Tutorial](https://nx.dev/tutorial/01-create-application)
+- `rootMargin`: root margin in px, see [MDN](https://developer.mozilla.org/en-US/docs/Web/API/IntersectionObserver/IntersectionObserver)
+- `threshold`: threshold, see [MDN](https://developer.mozilla.org/en-US/docs/Web/API/IntersectionObserver/IntersectionObserver)
+- `root`:  root element, see [MDN](https://developer.mozilla.org/en-US/docs/Web/API/IntersectionObserver/IntersectionObserver)
 
-## Adding capabilities to your workspace
+## Comparison of `async`-pipe vs `*rxObserve`-directive
 
-Nx supports many plugins which add capabilities for developing different types of applications and different tools.
+If we compare a highly optimized application where all components are using `OnPush` change detection strategy we can observe that the
+usage of the `async`-pipe is still quite expensive at it is internally calling `markForCheck` which marks the component itself and all of its parents for change detection.
+So the whole component (sub)-tree gets re-rendered. So not only the complete template of the affected component gets re-rendered but also its parents.
 
-These capabilities include generating applications, libraries, etc as well as the devtools to test, and build projects as well.
+`*rxObserve` on the other hand will only update the affected tiny template-piece:
+![async-pipe vs stream-directive](./libs/rx-observe/docs/stream-vs-async.png)
 
-Below are our core plugins:
+### Comparison of dirty checks: `async`-pipe vs `*rxObserve`-directive
+The numbers in the green circels cound the render-cycles. Please not on the right side where only the tiny template
+piece within `L2 Component` gets updated (the number on the left besides this name does not increase).
 
-- [Angular](https://angular.io)
-  - `ng add @nrwl/angular`
-- [React](https://reactjs.org)
-  - `ng add @nrwl/react`
-- Web (no framework frontends)
-  - `ng add @nrwl/web`
-- [Nest](https://nestjs.com)
-  - `ng add @nrwl/nest`
-- [Express](https://expressjs.com)
-  - `ng add @nrwl/express`
-- [Node](https://nodejs.org)
-  - `ng add @nrwl/node`
+Whereas on the left side all values do increase. There's no counter in the tiny template piece on the left because the
+`async`-pipe does trigger change detection on the whole component - therefore we only have a counter on component level.
+![dirty checks comparison](./libs/rx-observe/docs/dirty-checks-comparison.gif)
 
-There are also many [community plugins](https://nx.dev/community) you could add.
-
-## Generate an application
-
-Run `ng g @nrwl/angular:app my-app` to generate an application.
-
-> You can use any of the plugins above to generate applications as well.
-
-When using Nx, you can create multiple applications and libraries in the same workspace.
-
-## Generate a library
-
-Run `ng g @nrwl/angular:lib my-lib` to generate a library.
-
-> You can also use any of the plugins above to generate libraries as well.
-
-Libraries are shareable across libraries and applications. They can be imported from `@observe5/mylib`.
-
-## Development server
-
-Run `ng serve my-app` for a dev server. Navigate to http://localhost:4200/. The app will automatically reload if you change any of the source files.
-
-## Code scaffolding
-
-Run `ng g component my-component --project=my-app` to generate a new component.
-
-## Build
-
-Run `ng build my-app` to build the project. The build artifacts will be stored in the `dist/` directory. Use the `--prod` flag for a production build.
-
-## Running unit tests
-
-Run `ng test my-app` to execute the unit tests via [Jest](https://jestjs.io).
-
-Run `nx affected:test` to execute the unit tests affected by a change.
-
-## Running end-to-end tests
-
-Run `ng e2e my-app` to execute the end-to-end tests via [Cypress](https://www.cypress.io).
-
-Run `nx affected:e2e` to execute the end-to-end tests affected by a change.
-
-## Understand your workspace
-
-Run `nx dep-graph` to see a diagram of the dependencies of your projects.
-
-## Further help
-
-Visit the [Nx Documentation](https://nx.dev/angular) to learn more.
-
-
-
-
-
-
-## ☁ Nx Cloud
-
-### Distributed Computation Caching & Distributed Task Execution
-
-<p style="text-align: center;"><img src="https://raw.githubusercontent.com/nrwl/nx/master/images/nx-cloud-card.png"></p>
-
-Nx Cloud pairs with Nx in order to enable you to build and test code more rapidly, by up to 10 times. Even teams that are new to Nx can connect to Nx Cloud and start saving time instantly.
-
-Teams using Nx gain the advantage of building full-stack applications with their preferred framework alongside Nx’s advanced code generation and project dependency graph, plus a unified experience for both frontend and backend developers.
-
-Visit [Nx Cloud](https://nx.app/) to learn more.
+## Versioning
+* [Semantic Versioning 2.0.0](http://semver.org/)
+* Version 12.x.x is compatible with Angular 12.x.x
+* Version 14.x.x is compatible with Angular > 14.x.x
