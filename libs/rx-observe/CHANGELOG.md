@@ -2,6 +2,10 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+## [14.0.1](https://github.com/mikelgo/angular-kit-observe/compare/rx-observe-14.0.0...rx-observe-14.0.1) (2023-11-02)
+
+
+
 ## [13.0.1](https://github.com/mikelgo/angular-kit-observe/compare/rx-observe-14.0.0-rc.0...rx-observe-13.0.1) (2023-11-02)
 
 
