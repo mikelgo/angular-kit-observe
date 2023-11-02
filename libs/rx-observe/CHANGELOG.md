@@ -11,6 +11,15 @@ This file was generated using [@jscutlery/semver](https://github.com/jscutlery/s
 
 
 
+## [13.0.1](https://github.com/mikelgo/angular-kit-observe/compare/rx-observe-14.0.0-rc.0...rx-observe-13.0.1) (2023-11-02)
+
+
+### Bug Fixes
+
+* **rx-observe:** fix subscription handling ([79bdbb3](https://github.com/mikelgo/angular-kit-observe/commit/79bdbb3f6bd1f15e3c8c033aaf3a22f42cb6225f))
+
+
+
 ## [14.0.1](https://github.com/mikelgo/angular-kit-observe/compare/rx-observe-14.0.0...rx-observe-14.0.1) (2023-11-02)
 
 
