@@ -1,4 +1,6 @@
-<div *rxObserve="vm1$; let vm1; lazyViewCreation: true">
+<button (click)="pageIndex$$.next(Math.random())">pageIndex</button>
+<button (click)="chips()">chps</button>
+<div *rxObserve="vm1$; let vm1;">
   {{vm1 | json}}
   <ul>
     <li>totalelements {{vm1.totalElements}}</li>
@@ -16,3 +18,4 @@
     <li>loading {{vm2.loading}}</li>
   </ul>
 </div>
+

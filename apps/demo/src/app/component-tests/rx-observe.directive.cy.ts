@@ -12,17 +12,28 @@ import {
 import { MountConfig } from 'cypress/angular';
 import { CommonModule } from '@angular/common';
 
+// TODO cover all scenarios
 describe('RxObserveDirective', () => {
   it('should render', () => {
     const { render } = setup();
 
     render();
   });
+  describe('Change Detection', () => {
+    it('should only re-render the EmbeddedViewRef and not the whole component', () => {});
+  });
+  describe('lazyViewCreation', () => {
+    it('should not render element eagerly when lazyViewCreation = true', () => {});
+    it('should render element eagerly when lazyViewCreation = false', () => {});
+  });
+
+  //describe('Render strategies', () =>{})
 });
 
+interface TestModel {}
 function setup(cfg?: {
   streamConfig?: RxObserveDirectiveConfig;
-  mountConfig?: MountConfig<any>;
+  mountConfig?: MountConfig<RxObserveDirective<TestModel>>;
 }) {
   return {
     render: () => {

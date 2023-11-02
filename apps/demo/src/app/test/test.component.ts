@@ -1,5 +1,5 @@
-import { Component, OnInit } from '@angular/core';
-import { Observable, of } from 'rxjs';
+import {Component, OnInit} from '@angular/core';
+import {combineLatest, map, Observable, of, Subject} from 'rxjs';
 
 interface KK {
   id: number;
@@ -23,14 +23,44 @@ type TeilnehmerListViewModel = TeilnehmerListComponentState & {
   styleUrls: ['./test.component.css'],
 })
 export class TestComponent implements OnInit {
-  vm1$: Observable<TeilnehmerListComponentState> = of({
+  chips$$ = new Subject<string[]>();
+  pageIndex$$ = new Subject<number>();
+  /*  vm1$: Observable<TeilnehmerListComponentState> = of({
     chips: [],
     kk: [],
     loading: true,
     pageIndex: 0,
     pageSize: 0,
     totalElements: 0,
-  });
+  });*/
+
+  // @ts-ignore
+
+  vm1$: Observable<TeilnehmerListComponentState> = combineLatest([
+    of({
+      chips: [],
+      kk: [],
+      loading: true,
+      pageIndex: 0,
+      pageSize: 0,
+      totalElements: 0,
+    }),
+    this.chips$$,
+    this.pageIndex$$,
+  ]).pipe(
+    map(([init, chips, pageIndex]) => ({
+      chips,
+      pageIndex,
+      // @ts-ignore
+      pageSize: init.pageSize,
+      // @ts-ignore
+      loading: init.loading,
+      // @ts-ignore
+      totalElements: init.totalElements,
+      // @ts-ignore
+      kk: init.kk,
+    }))
+  );
 
   vm2$: Observable<TeilnehmerListViewModel> = of({
     chips: [],
@@ -45,4 +75,10 @@ export class TestComponent implements OnInit {
   constructor() {}
 
   ngOnInit(): void {}
+
+  protected readonly Math = Math;
+
+  chips() {
+    this.chips$$.next([`${Math.random()}`]);
+  }
 }
