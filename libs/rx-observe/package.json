@@ -1,6 +1,6 @@
 {
   "name": "@angular-kit/rx-observe",
-  "version": "13.0.1",
+  "version": "14.0.1",
   "publishConfig": {
     "access": "public"
   },
