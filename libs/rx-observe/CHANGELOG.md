@@ -1,5 +1,16 @@
 # Changelog
 
+This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
+
+## [13.0.1](https://github.com/mikelgo/angular-kit-observe/compare/rx-observe-14.0.0-rc.0...rx-observe-13.0.1) (2023-11-02)
+
+
+### Bug Fixes
+
+* **rx-observe:** fix subscription handling ([c8f6aa1](https://github.com/mikelgo/angular-kit-observe/commit/c8f6aa1b890d55e6bd2be8b61941c41d8448c5c5))
+
+
+
 ## [14.0.0](https://github.com/mikelgo/angular-kit/compare/stream-2.2.3...stream-2.2.4) (2023-10-24)
 ### Features
 * refactor to standalone directive and modern Angular features
