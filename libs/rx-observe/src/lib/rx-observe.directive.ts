@@ -1,29 +1,28 @@
 import {
-    Directive,
-    EmbeddedViewRef,
-    inject,
-    Injector,
-    Input,
-    OnDestroy,
-    OnInit,
-    TemplateRef,
-    ViewContainerRef,
+  Directive,
+  EmbeddedViewRef,
+  inject,
+  Injector,
+  Input,
+  OnDestroy,
+  OnInit,
+  TemplateRef,
+  ViewContainerRef,
 } from '@angular/core';
-import {BehaviorSubject, Observable, of, ReplaySubject, Subject, Subscription,} from 'rxjs';
+import {BehaviorSubject, Observable, of, ReplaySubject, Subject, Subscription, switchAll,} from 'rxjs';
 import {
-    combineLatestWith,
-    distinctUntilChanged,
-    filter,
-    map,
-    mergeAll,
-    startWith,
-    switchMap,
-    withLatestFrom,
+  combineLatestWith,
+  distinctUntilChanged,
+  filter,
+  map,
+  startWith,
+  switchMap,
+  withLatestFrom,
 } from 'rxjs/operators';
 import {
-    injectStreamDirectiveConfig,
-    RX_OBSERVE_DIRECTIVE_CONTEXT,
-    RxObserveDirectiveConfig,
+  injectStreamDirectiveConfig,
+  RX_OBSERVE_DIRECTIVE_CONTEXT,
+  RxObserveDirectiveConfig,
 } from './rx-observe-directive-config';
 import {isViewportRenderStrategy, RenderStrategies,} from './types/render-strategies';
 import {coerceObservable} from './util/coerce-observable';
@@ -165,7 +164,7 @@ export class RxObserveDirective<T> implements OnInit, OnDestroy {
 
   readonly renderStrategy$ = this.renderStrategy$$
     .asObservable()
-    .pipe(distinctUntilChanged(), mergeAll(), distinctUntilChanged());
+    .pipe(distinctUntilChanged(), switchAll(), distinctUntilChanged());
   readonly isViewPortStrategy$ = this.renderStrategy$.pipe(
     map((strategy) => strategy.type === 'viewport')
   );
@@ -242,7 +241,7 @@ export class RxObserveDirective<T> implements OnInit, OnDestroy {
       this.refreshEffect$$
         .pipe(
           distinctUntilChanged(),
-          mergeAll(),
+          switchAll(),
           withLatestFrom(this.loadingTemplate$$.pipe(startWith(null)))
         )
         .subscribe(([_, loadingTemplate]) => {
