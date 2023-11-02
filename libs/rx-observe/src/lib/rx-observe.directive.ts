@@ -1,47 +1,37 @@
 import {
-  Directive,
-  EmbeddedViewRef,
-  inject,
-  Injector,
-  Input,
-  OnDestroy,
-  OnInit,
-  TemplateRef,
-  ViewContainerRef,
+    Directive,
+    EmbeddedViewRef,
+    inject,
+    Injector,
+    Input,
+    OnDestroy,
+    OnInit,
+    TemplateRef,
+    ViewContainerRef,
 } from '@angular/core';
+import {BehaviorSubject, Observable, of, ReplaySubject, Subject, Subscription,} from 'rxjs';
 import {
-  BehaviorSubject,
-  Observable,
-  of,
-  ReplaySubject,
-  Subject,
-  Subscription,
-} from 'rxjs';
-import {
-  combineLatestWith,
-  distinctUntilChanged,
-  filter,
-  map,
-  mergeAll,
-  startWith,
-  switchMap,
-  withLatestFrom,
+    combineLatestWith,
+    distinctUntilChanged,
+    filter,
+    map,
+    mergeAll,
+    startWith,
+    switchMap,
+    withLatestFrom,
 } from 'rxjs/operators';
 import {
-  injectStreamDirectiveConfig,
-  RX_OBSERVE_DIRECTIVE_CONTEXT,
-  RxObserveDirectiveConfig,
+    injectStreamDirectiveConfig,
+    RX_OBSERVE_DIRECTIVE_CONTEXT,
+    RxObserveDirectiveConfig,
 } from './rx-observe-directive-config';
-import {
-  isViewportRenderStrategy,
-  RenderStrategies,
-} from './types/render-strategies';
-import { coerceObservable } from './util/coerce-observable';
-import { RenderContext } from './types/render-context';
-import { ObserveDirectiveContext } from './types/observe-directive-context';
-import { setupOperator$ } from './util/setup-operator';
-import { createIntersectionObserver } from './util/create-intersection-observer';
-import { supportsIntersectionObserver } from './util/supports-intersection-observer';
+import {isViewportRenderStrategy, RenderStrategies,} from './types/render-strategies';
+import {coerceObservable} from './util/coerce-observable';
+import {RenderContext} from './types/render-context';
+import {ObserveDirectiveContext} from './types/observe-directive-context';
+import {setupOperator$} from './util/setup-operator';
+import {createIntersectionObserver} from './util/create-intersection-observer';
+import {supportsIntersectionObserver} from './util/supports-intersection-observer';
 
 @Directive({
   selector: '[rxObserve]',
@@ -285,7 +275,7 @@ export class RxObserveDirective<T> implements OnInit, OnDestroy {
     );
 
     // todo refactor into smaller chunks
-    this.subscription = this.sourceWithOperator$
+    this.subscription.add(this.sourceWithOperator$
       .pipe(
         distinctUntilChanged(),
         filter((v) => v !== undefined),
@@ -366,7 +356,7 @@ export class RxObserveDirective<T> implements OnInit, OnDestroy {
             error: this.context.error,
           });
         },
-      });
+      }));
   }
 
   private createInjector() {
